@@ -41,14 +41,18 @@ Starting localk8s_master_1...
 Starting localk8s_proxy_1...
 Starting localk8s_etcd_1...
 ```
-which means that you have a k8s cluster running. This is a bit of an odd setup, as the master and node are running within the same machine as containers. If you are interested, there are many other ways of provisioning a k8s cluster [here](http://kubernetes.io/v1.1/docs/getting-started-guides/), both locally or on production infrastructure. On the google cloud platform, k8s is a "turn-key" technology, so if you run `gcloud container clusters create <cluster_name>` you get a k8s cluster, that easy.
+which means that you have a k8s cluster running. This is a bit of an odd setup, as the master and node are running within the same machine as containers. If you are interested, there are many other ways of provisioning a k8s cluster [here](http://kubernetes.io/v1.1/docs/getting-started-guides/), both locally or on production infrastructure. There are also a number of independent tutorials on different flavours, such as [bloombergs](https://github.com/bloomberg/kubernetes-cluster-cookbook/blob/master/templates/default/flannel-flanneld.erb), [pangaea](https://github.com/hasura/pangaea), on [CoreOS](https://coreos.com/kubernetes/docs/latest/getting-started.html), or the one I'm [using](https://github.com/phnmnl/mantl-kubernetes) for openstack, among many others. 
+On the google cloud platform, k8s is a "turn-key" technology, so if you run `gcloud container clusters create <cluster_name>` you get a k8s cluster, that easy. There is also a way through the REST service and dashboard.
 
 First we will take a brief look at the components of the docker compose (slides).
 
 ## Communicating with the k8s cluster
 
-Once you have lifted your cluster, you need to be able to talk to it. k8s provides both a REST based access or a command-line interface (which is nothing but a client to this REST API). Becuase we are running a setup in which we have a virtual machine in the middle
-![docker on mac](https://docs.docker.com/engine/installation/images/mac_docker_host.svg) we need to first tunnel our way through the VM to access the cluster. We achieve this on a separate terminal with:
+Once you have lifted your cluster, you need to be able to talk to it. k8s provides both a REST based access or a command-line interface (which is nothing but a client to this REST API). We are running a setup in which we have a virtual machine in the middle:
+
+![docker on mac](https://docs.docker.com/engine/installation/images/mac_docker_host.svg) 
+
+This means that we need to first tunnel our way through the VM to access the cluster. We achieve this on a separate terminal with:
 ```
 docker-machine ssh default -L 8080:localhost:8080
 ```
@@ -70,9 +74,59 @@ and you should get an output like:
 ```
 
 however, for simplicity, we will use the command line interface (cli). Please download for your platform:
-- For Mac:
-- For Linux:
-- For Windows:
+- For Mac, execute:
+```
+wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.1.2/bin/darwin/amd64/kubectl
+chmod a+x /usr/local/bin/kubectl
+```
+- For Linux, execute:
+```
+wget -O /usr/local/bin/kubectl http://storage.googleapis.com/kubernetes-release/release/v1.1.2/bin/linux/amd64/kubectl
+chmod a+x /usr/local/bin/kubectl
+```
+- For Windows, download from [here](https://github.com/eirslett/kubectl-windows/raw/master/kubectl-1.1.3.exe), rename to kubectl and put it in your path.
+
+Now, you should be able to call kubectl and start talking to your tiny k8s cluster:
+
+```
+kubectl cluster-info
+```
+and get an output. On a real setup, the process of hooking up your kubectl with your cluster is a bit more cumbersome, as it requires to set a `kubeconfig` file (normally on `~/.kube/config`) which contains necessary user names, passwords, server address and port, private key and certificates. The `kubectl` to cluster connection is supposed to be secure. This kubeconfig file is generated differently according to how you lift your k8s cluster. Please see [here](https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/user-guide/kubeconfig-file.md) for documentation on generating a kubeconfig (not needed for this tutorial).
+
+### Using kubectl
+
+`kubectl` allows to both retrieve the status of different elements of the cluster and give instructions to the cluster. The complete documentation is [here](https://cloud.google.com/container-engine/docs/kubectl/). Some documentation is given by executing with no arguments.
+
+To see the nodes/pods/jobs/services/rpc you do (although you won't have any now):
+```
+kubectl get nodes
+kubectl get pods
+kubectl get jobs
+kubectl get svc
+kubectl get rc
+```
+To view your current connection config:
+```
+kubectl config view
+```
+And to view versions:
+```
+kubectl version
+```
+
+#### What we are here for: sending jobs
+
+Jobs can be codified directly on a cli call to kubectl:
+```
+```
+
+
+
+
+
+
+
+
 
 
 
