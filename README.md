@@ -72,8 +72,12 @@ and you should get an output like:
   ]
 }
 ```
+you could also try:
+```
+curl localhost:8080/api/v1/nodes
+```
 
-however, for simplicity, we will use the command line interface (cli). Please download for your platform:
+However, for simplicity, we will use the command line interface (cli). Please download for your platform:
 - For Mac, execute:
 ```
 wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.1.2/bin/darwin/amd64/kubectl
@@ -91,7 +95,7 @@ Now, you should be able to call kubectl and start talking to your tiny k8s clust
 ```
 kubectl cluster-info
 ```
-and get an output. On a real setup, the process of hooking up your kubectl with your cluster is a bit more cumbersome, as it requires to set a `kubeconfig` file (normally on `~/.kube/config`) which contains necessary user names, passwords, server address and port, private key and certificates. The `kubectl` to cluster connection is supposed to be secure. This kubeconfig file is generated differently according to how you lift your k8s cluster. Please see [here](https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/user-guide/kubeconfig-file.md) for documentation on generating a kubeconfig (not needed for this tutorial).
+and get an output. On a real setup, the process of hooking up your kubectl with your cluster is a bit more cumbersome, as it requires to set a `kubeconfig` file (normally on `~/.kube/config`) which contains necessary user names, passwords, server address and port, private key and certificates. The `kubectl` to cluster connection is supposed to be secure. This kubeconfig file is generated differently according to how you lift your k8s cluster. Please see [here](https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/user-guide/kubeconfig-file.md) for documentation on generating a kubeconfig (not needed for this tutorial). (Show my config for the EMBASSY installation).
 
 ### Using kubectl
 
@@ -114,11 +118,55 @@ And to view versions:
 kubectl version
 ```
 
-#### What we are here for: sending jobs
+#### What we are here for: sending jobs, pods, etc.
 
-Jobs can be codified directly on a cli call to kubectl:
+In k8s, Jobs are one-off executions (ie. batch jobs), which is probably our most important use case (PhenoMeNal Project). More documentation on k8s jobs can be found [here](https://cloud.google.com/container-engine/docs/jobs). To send a job, you normally first condify it into a yaml or json file. The first example we will try looks like this:
+```yaml
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  name: pi
+spec:
+  selector:
+    matchLabels:
+      app: pi
+  template:
+    metadata:
+      name: pi
+      labels:
+        app: pi
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
 ```
+If you have checked out this repo, it should be on the base directoy, under the name `example_jobs.yml`. What this job will do essentially is to run a docker image containing a `Perl` installation, and a command in will be executed in perl to compute the number \pi with 2000 decimals. Supposing you have the file mentioned in place, execute the following to send the job to the cluster:
 ```
+kubectl create -f example_job.yaml
+```
+And it should state that the job 'pi' was created. Kubernetes will automagically pull from Docker hub the docker image required, in this case, the perl [image](https://hub.docker.com/_/perl/). Normally an underscore before the image name means that that is the offical image provided for that something.
+
+Now we can see what happened to our job (last two are the same if the file is there):
+```
+kubectl get jobs
+kubectl describe jobs/pi
+kubectl describe -f example_job.yaml
+```
+When a job is sent, its actual execution is done through a pod. The last command shows us the pods that were created to execute this job (see table at the bottom, where it says "Message", it should say "Created pod: "). Using that pod name, or finding the name through `kubectl get pods`, you can then execute this to obtain more information about the run:
+
+```
+kubectl describe pods/pi-...
+```
+The output might be indicative of an error in this case, but the important message is in the end in the 'Status' part.
+
+Now, because this job is outputing to the STDOUT, we can easily see the output with:
+```
+kubectl logs pi-...
+```
+Where `pi-...` is the name of the pod. You should see \pi with plenty of decimals. There was no need to install perl nor other dependencies to do this.
+
 
 
 
