@@ -25,6 +25,9 @@ If we want to do some computations, we might need to have a shared filesystem, f
 
 ```
 kubectl create -f glusterfs_on_gce_k8s.yaml
+kubectl describe rc/glusterfs-storage
+kubectl logs <pod-id-1>
+kubectl logs <pod-id-2>
 ```
 
 We can now try for instance one of our images...
