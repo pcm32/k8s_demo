@@ -1,6 +1,8 @@
 # Galaxy and k8s on the EBI-EMBASSY Cloud
 
-This part of the demo builds on work kindly shared by [Stephanie](https://github.com/stephanieherman), [Payam](https://github.com/PayamEmami), Anders, [Marco](https://github.com/mcapuccini) and Ola, our partners at Uppsala. We use their workflow and image container definitions available [here](https://github.com/phnmnl/workflow-demo) (you don't need to follow that link to continue).
+This part of the demo builds on work kindly shared by [Stephanie](https://github.com/stephanieherman), [Payam](https://github.com/PayamEmami), Anders, [Marco](https://github.com/mcapuccini) and Ola, our friends at Uppsala. We use their workflow and image container definitions available [here](https://github.com/phnmnl/workflow-demo) (you don't need to follow that link to continue).
+
+The integration work between Galaxy/W4M and Kubernetes was written in collaboration with [Pierrick ROGER](https://github.com/pierrickrogermele) from CEA, France.
 
 Since we are using a different k8s cluster now, we need to swap the `~/.kube/config` file to get the adequate authentication to use the EMBASSY Cloud installation (which is provisioned through [this](https://github.com/phnmnl/mantl-kubernetes) MANTL kubernetes setup).
 
