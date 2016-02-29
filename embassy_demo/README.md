@@ -2,6 +2,8 @@
 
 This part of the demo builds on work kindly shared by [Stephanie](https://github.com/stephanieherman), [Payam](https://github.com/PayamEmami), Anders, [Marco](https://github.com/mcapuccini) and Ola, our friends at Uppsala. We use their workflow and image container definitions available [here](https://github.com/phnmnl/workflow-demo) (you don't need to follow that link to continue).
 
+![Uppsala Workflow](https://camo.githubusercontent.com/2373676ecde518698f618c250656d0cdae261d49/687474703a2f2f6936352e74696e797069632e636f6d2f33353265786b782e706e67)
+
 The integration work between Galaxy/W4M and Kubernetes was written in collaboration with [Pierrick ROGER](https://github.com/pierrickrogermele) from CEA, France.
 
 Since we are using a different k8s cluster now, we need to swap the `~/.kube/config` file to get the adequate authentication to use the EMBASSY Cloud installation (which is provisioned through [this](https://github.com/phnmnl/mantl-kubernetes) MANTL kubernetes setup).
@@ -21,7 +23,7 @@ In this case, everything will be executed from the W4M VM image running on the E
 
 At the EMBASSY Cloud we have our own instance of Jenkins which has hooks to the dockerfile github repos that we are interested. You can access our live instance [here](http://phenomenal-h2020.eu/jenkins/)
 
-![Figure 2: EMBASSY Jenkins instance]()
+![Figure 2: EMBASSY Jenkins instance](jenkins_screenshot.png)
 
 So, for instance, the first step of the Uppsala's demo workflow, the BlankFilter, whose dockerfile is [here](https://github.com/phnmnl/workflow-demo/blob/master/BlankFilter/Dockerfile) and looks like this:
 
@@ -186,7 +188,7 @@ So, for `k8s` based execution, we would need a wrapper that instead looks more o
 </tool>
 ```
 
-
+Lets go and see this working now on Galaxy/W4M.
 
 
 
