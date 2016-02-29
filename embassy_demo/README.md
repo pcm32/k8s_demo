@@ -37,6 +37,11 @@ and this is built (as in `docker build -t phnmnl/ex-blankfilter .`) by our EMBAS
 
 ### Job execution and shared file system  
 
+```bash
+deactivate
+```
+to get out of the Galaxy/W4M default virtualenv.
+
 So, to execute that first step of the Uppsala example workflow, we would first need to somehow upload the data "somewhere", that would be our shared filesystem:
 
 ```bash
@@ -113,6 +118,74 @@ submit_k8s_job -j blankfilter -n blankfilter -c blankfilter \
 /mnt/glusterfs/uppsala-ex/inputdata_workshop.xls \
 /mnt/glusterfs/uppsala-ex/output_blankfilter_k8s_helper.xls
 ```
+
+We can check output files.
+
+### Calling k8s-helper from galaxy
+
+Now we will showcase how can Galaxy (the W4M installation), can interact with Kubernetes through the helper.
+
+First, a normal wrapped BlankFilter tool for Galaxy would look somehow like this:
+
+```xml
+<tool id="upps_blankfilter" name="BlankFilter_Regular" version="0.1.0">
+    <requirements>
+        <requirement type="package">Rscript</requirement>
+    </requirements>
+    <command><![CDATA[
+	Rscript BlankFilter.r "$input1" "$output1"
+    ]]></command>
+    <inputs>
+        <param type="data" name="input1" format="xls" />
+    </inputs>
+    <outputs>
+        <data name="output1" format="xls" />
+    </outputs>
+    <help><![CDATA[
+        TODO: Fill in help.
+    ]]></help>
+</tool>
+```
+
+In contrast, making some changes, we can move from local execution to k8s powered execution, provided that `kubectl` is properly installed and points to a `k8s` cluster, and there is of course shared filesystem. There are other changes necessary at the Galaxy side, but they are general to any tool and I won't go into the details here.
+
+So, for `k8s` based execution, we would need a wrapper that instead looks more or less like:
+
+```xml
+<tool id="upps_blankfilter" name="BlankFilter" version="0.1.0">
+    <requirements>
+        <requirement type="package">submit_k8s_job</requirement>
+    </requirements>
+    <stdio>
+        <exit_code range="1:" />
+    </stdio>
+    <command><![CDATA[
+        submit_k8s_jobs 
+                   -j blankfilter
+                   -n blankfilter
+                   -c blankfilter
+                   --cimgrepos docker-registry.local:50000
+                   --cimgowner phnmnl 
+                   --cimgname ex-blankfilter
+                   --cimgver latest
+                   --volpath /mnt/glusterfs
+                   --volname glusterfsvol
+                   --glusterfspath scratch
+   --
+   "$input1" "$output1"
+    ]]></command>
+    <inputs>
+        <param type="data" name="input1" format="xls" />
+    </inputs>
+    <outputs>
+        <data name="output1" format="xls" />
+    </outputs>
+    <help><![CDATA[
+        TODO: Fill in help.
+    ]]></help>
+</tool>
+```
+
 
 
 
