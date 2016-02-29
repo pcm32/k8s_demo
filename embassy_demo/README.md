@@ -15,6 +15,8 @@ ln -s ~/.kube/config_embassy ~/.kube/config
 
 Here we will describe how to go from a dockerfile codified tool to something that we run on Galaxy (the W4M) installation and that is offloaded (the heavy computation) to the Kubernetes cluster.
 
+In this case, everything will be executed from the W4M VM image running on the EBI-EMBASSY Cloud.
+
 ### Dockerfile is built and pushed to an accesible hub for the k8s cluster
 
 At the EMBASSY Cloud we have our own instance of Jenkins which has hooks to the dockerfile github repos that we are interested. You can access our live instance [here](http://phenomenal-h2020.eu/jenkins/)
@@ -33,14 +35,86 @@ ENTRYPOINT ["Rscript", "BlankFilter.r"]
 
 and this is built (as in `docker build -t phnmnl/ex-blankfilter .`) by our EMBASSY Cloud Jenkins, and subsequently pushed to our internal docker registry.
 
-So, to execute that first step of the Uppsala example workflow, we would first need to somehow upload the data to our shared filesystem, and then execute:
+### Job execution and shared file system  
+
+So, to execute that first step of the Uppsala example workflow, we would first need to somehow upload the data "somewhere", that would be our shared filesystem:
 
 ```bash
-kubectl create -f run_blankfilter_step.yaml
+ls -l /mnt/glusterfs/uppsala-ex/
 ```
 
-where the run_blankfilter_step.yaml looks like this:
+and then execute:
+
+```bash
+cd /galaxy/dist/phenomenal/k8s_demo/embassy_demo
+kubectl create -f run_blankfilter_step.yaml
+POD=`kubectl describe -f run_blankfilter_step.yaml | grep 'pod:' | awk -F'pod: ' '{ print $2 }'`
+kubectl describe pods/$POD
+```
+
+where the run_blankfilter_step.yaml (part of the repository) looks like this:
 
 ```yaml
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  name: blankfilter-ex
+spec:
+  selector:
+    matchLabels:
+      app: bf-ex
+  template:
+    metadata:
+      name: bf-ex
+      labels:
+         app: bf-ex
+    spec:
+      containers:
+      - name: blankfilter
+        image: docker-registry.local:50000/phnmnl/ex-blankfilter:latest
+        args:
+                - /mnt/glusterfs/uppsala-ex/inputdata_workshop.xls
+                - /mnt/glusterfs/uppsala-ex/output_blankfilter_workshop.xls
+        volumeMounts: 
+          - name: glusterfsvol
+            mountPath: /mnt/glusterfs
+      restartPolicy: Never
+      volumes: 
+         - name: glusterfsvol
+           glusterfs: 
+               endpoints: glusterfs-cluster
+               path: scratch
+               readOnly: false
+```
+
+And we can see the output file of the run here:
 
 ```
+ls -l /mnt/glusterfs/uppsala-ex/
+less /mnt/glusterfs/uppsala-ex/output_blankfilter_workshop.xls
+```
+
+### Two is company, (but) three's a crowd
+
+However, Galaxy is used to wait for the executable to finish to go and find result files. The `kubectl` API wrapper doesn't wait for jobs to finish, it only submits then. Hence, we wrote a [k8s-helper tool](https://github.com/phnmnl/k8s-helper) to interface `Galaxy` to `kubectl`. This tool sends a job to k8s through `kubectl`, interacts with `kubectl` until the job is done, to exit when this happens. By using `kubectl` as a dependency, we left to that tool the whole authentication process, finished job removal, failed job handling, etc. In the long term possible we should develop something that makes use of the REST API directly, but for proof of concept, this is fine.
+
+We will first illustrate the use of k8s-helper on its own, and later show how Galaxy makes use of it. To execute the very same job that we just run, this time through k8s-helper, we execute:
+
+```
+submit_k8s_job -j blankfilter -n blankfilter -c blankfilter \
+--cimgrepos docker-registry.local:50000 \
+--cimgowner phnmnl \
+--cimgname ex-blankfilter \
+--cimgver latest \
+--volpath /mnt/glusterfs \
+--volname glusterfsvol \
+--glusterfspath scratch \
+-- \
+/mnt/glusterfs/uppsala-ex/inputdata_workshop.xls \
+/mnt/glusterfs/uppsala-ex/output_blankfilter_k8s_helper.xls
+```
+
+
+
+
+
