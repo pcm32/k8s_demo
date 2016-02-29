@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  name: perl-replace
+spec:
+  selector:
+    matchLabels:
+      app: perl-replace
+  template:
+    metadata:
+      name: perl-replace
+      labels:
+        app: perl-replace
+    spec:
+      containers:
+      - name: perl-replace
+        image: perl
+        command: ["perl", "-i.bak", "-p", "-e", "s/[Kk]ubernetes/k8s/g","/mnt/glusterfs/about_kubernetes.txt"]
+        volumeMounts: 
+          - name: glusterfsvol
+            mountPath: /mnt/glusterfs
+      volumes: 
+         - name: glusterfsvol
+           glusterfs: 
+               endpoints: glusterfs-cluster
+               path: scratch
+               readOnly: false
+      restartPolicy: Never
+

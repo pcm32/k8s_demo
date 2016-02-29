@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  name: ipo-test
+spec:
+  selector:
+    matchLabels:
+      app: ipo
+  template:
+    metadata:
+      name: ipo
+      labels:
+        app: ipo
+    spec:
+      containers:
+      - name: ipo-run
+        image: phenomenal/ipo:latest
+        volumeMounts: 
+          - name: glusterfsvol
+            mountPath: /mnt/glusterfs
+      restartPolicy: Never
+      volumes: 
+         - name: glusterfsvol
+           glusterfs: 
+               endpoints: glusterfs-cluster
+               path: scratch
+               readOnly: false

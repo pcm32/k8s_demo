@@ -1,0 +1,21 @@
+{
+  "kind": "Endpoints",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "glusterfs-cluster"
+  },
+  "subsets": [
+    {
+      "addresses": [
+        {
+          "ip": "{{ hostvars[groups['master'][0]].ansible_default_ipv4.address }}"
+        }
+      ],
+      "ports": [
+        {
+          "port": 1
+        }
+      ]
+    }
+  ]
+}

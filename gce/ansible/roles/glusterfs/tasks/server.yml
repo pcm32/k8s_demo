@@ -1,0 +1,16 @@
+---
+# GlusterFS Server side
+- include_vars: server.yml
+
+- debug: 
+     msg: "Brick path {{ item.bricks[0] }}"
+  with_items: '{{ glusterfs_volumes }}' 
+
+- name: create mount point for volumes to be exposed
+  sudo: yes
+  file:
+    state: directory
+    name: "{{ item.bricks[0] }}"
+    recurse: yes
+    mode: 0755
+  with_items: '{{ glusterfs_volumes }}'

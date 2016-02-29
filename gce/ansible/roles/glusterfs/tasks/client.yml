@@ -1,0 +1,17 @@
+---
+# GlusterFS Client side
+- include_vars: client.yml
+  tags:
+    - glusterfs
+
+- name: create mount point for glusterfs volumes
+  sudo: yes
+  file:
+          state: directory
+          name: "{{ item.bricks[0] | basename }}"
+          recurse: yes
+          mode: 0755
+  with_items: "{{ glusterfs_volumes }}"
+  tags:
+    - glusterfs
+

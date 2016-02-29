@@ -1,0 +1,10 @@
+--
+{% if 'master' in group_names %}
+   # something that applies to all app servers.
+   - include: server.yml
+{% endif %}
+
+{% if 'node' in group_names %}
+   # something that applies to all app servers.
+   - include: client.yml
+{% endif %}

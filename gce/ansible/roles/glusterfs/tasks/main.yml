@@ -1,0 +1,19 @@
+---
+
+- name: evaluate first_master
+  add_host:
+    name: "{{ groups['master'][0] }}"
+    groups: first_master
+    when: "master in groups and groups['master'] | length > 1"
+
+# something that applies to all app servers.
+- include: server.yml
+  when: "'master' in group_names"
+  tags:
+   - glusterfs
+
+# something that applies to all app servers.
+- include: client.yml
+  when: "'node' in group_names"
+  tags:
+   - glusterfs

@@ -1,0 +1,38 @@
+---
+- name: create directory
+  file: path=~/.kube state=directory
+
+- name: transfer kube config
+  copy: src=~/.kube/config dest=~/.kube/config 
+
+- name: add endpoint configuration for containers to connect to gluster cluster
+  template: 
+     src: glusterfs-endpoints.json.j2
+     dest: "~/glusterfs-endpoints.json"
+  when: '"first_master" in group_names'
+
+- name: enable endpoint
+  shell: kubectl create -f ~/glusterfs-endpoints.json
+  register: endpoint_creation
+  ignore_errors: yes
+  changed_when: "'created' in endpoint_creation.stdout"
+  when: '"first_master" in group_names'
+
+- name: add service configuration for containers to connect to gluster cluster
+  template:
+     src: glusterfs-service.json.j2
+     dest: "~/glusterfs-service.json"
+  when: '"first_master" in group_names'
+
+- name: enable service
+  shell: kubectl create -f ~/glusterfs-service.json
+  register: service_creation
+  ignore_errors: yes
+  changed_when: "'created' in service_creation.stdout"
+  when: '"first_master" in group_names'
+
+
+
+
+
+

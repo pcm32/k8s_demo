@@ -1,0 +1,12 @@
+---
+# GlusterFS Server side
+glusterfs_install_server: True
+glusterfs_volumes:
+        - name: scratch
+          cluster: "{{ groups['master'] | join(',') }}" 
+          host: '{{ inventory_hostname }}'
+          options:
+                  nfs.disable: 'on'
+          force: True
+          bricks:
+                  - /data/glusterfs/scratch/brick1/brick

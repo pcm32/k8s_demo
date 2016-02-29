@@ -1,0 +1,24 @@
+---
+# all facts for all hosts are gathered; and the common packages
+# and configurations are performed on each host.
+
+- hosts: all
+  tasks: []
+
+# provide the control plane
+- name: Master
+  hosts: master
+  gather_facts: no
+  roles:
+    - { role: glusterfs, tags: ["glusterfs"] }
+    - { role: jgeusebroek.glusterfs, become: True, tags: ["glusterfs"] }
+    - { role: k8s-containers-glusterfs, tags: ["glusterfs"] }
+
+
+# provide the execution plane
+- name: Node
+  hosts: node
+  gather_facts: no
+  roles:
+    - { role: glusterfs, tags: ["glusterfs"] }
+    - { role: jgeusebroek.glusterfs, become: True, tags: ["glusterfs"] }
