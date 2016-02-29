@@ -141,6 +141,7 @@ scp about_kubernetes.txt $NODE:~/
 ssh $NODE 'sudo cp about_kubernetes.txt /mnt/scratch/'
 kubectl create -f replace_glusterfs_example.yaml
 ```
+Take a look at the local `about_kubernetes.txt`, so that you can notice the difference after the job is done. This will essentially replace all the \[Kk\]ubernetes to its abbreviated form 'k8s'.
 
 And once the job is completed:
 ```
@@ -148,3 +149,4 @@ ssh $NODE 'sudo less /mnt/scratch/about_kubernetes.txt'
 ssh $NODE 'sudo ls -l /mnt/scratch/'
 ```
 
+This should show you that the file changed, and that a backup was produced.

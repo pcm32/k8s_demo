@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  name: blankfilter-ex
+spec:
+  selector:
+    matchLabels:
+      app: bf
+  template:
+    metadata:
+            name: bf-ex
+      labels:
+              app: bf-ex
+    spec:
+      containers:
+      - name: blankfilter
+        image: docker-registry.local:50000/phnmnl/ex-blankfilter:latest
+        args:
+                - /mnt/glusterfs/uppsala-ex/inputdata_workshop.xls
+                - /mnt/glusterfs/uppsala-ex/output_blankfilter_workshop.xls
+        volumeMounts: 
+          - name: glusterfsvol
+            mountPath: /mnt/glusterfs
+      restartPolicy: Never
+      volumes: 
+         - name: glusterfsvol
+           glusterfs: 
+               endpoints: glusterfs-cluster
+               path: scratch
+               readOnly: false
