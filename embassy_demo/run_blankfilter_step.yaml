@@ -5,12 +5,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: bf
+      app: bf-ex
   template:
     metadata:
-            name: bf-ex
+      name: bf-ex
       labels:
-              app: bf-ex
+         app: bf-ex
     spec:
       containers:
       - name: blankfilter
