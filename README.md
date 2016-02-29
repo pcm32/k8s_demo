@@ -4,13 +4,24 @@
 
 Please make sure that you have docker installed, and docker-machine installed if using a mac or windows. Docker-machine can also be installed on linux, and for the sake of this hands-on, we will assume that you have it installed.
 
+You can get docker-toolbox (includes docker-machine) for Mac and Windows [here](https://www.docker.com/products/docker-toolbox).
+
+On the Mac it can be installed with `brew install docker-machine` (if you use homebrew)
+
+On Ubuntu (such as the VM that Marco facilitated yesterday) you could use the directions shown [here](https://docs.docker.com/machine/install-machine/) (simply a binary download).
+
 ## Part 1: Lifting up your own instance
 
 We are going to lift a k8s cluster locally for the sake of interacting with it in simple scenarios. This is clearly not a production set up, but an instance to learn the basics on the interactions with a Kubernetes cluster. We are going to use a docker compose approach.
 
-If you are in a mac or windows, make sure that you are in a terminal that has proper. With docker-machine installed, this can be done by opening `Docker Quickstart Terminal`. This should start you `docker-machine` VM if it is not already running.
+If you are in a mac or windows, make sure that you are in a terminal that has proper docker access. With docker-machine installed, this can be done by opening `Docker Quickstart Terminal` application. This should start you `docker-machine` VM if it is not already running. If you have worked before with docker machine and have many docker containers running, or have run this tutorial before, I would recommend that you get a semi-fresh start by restarting the VM.
 
-On that terminal, clone or download this repo:
+On the blessed terminal:
+```
+docker-machine restart default
+```
+
+On the same terminal, clone or download this repo at an appropiate location for you:
 ```
 git clone https://github.com/pcm32/k8s_demo.git
 cd k8s_demo
@@ -25,17 +36,17 @@ Get http:///var/run/docker.sock/v1.20/containers/json: dial unix /var/run/docker
 * Are you trying to connect to a TLS-enabled daemon without TLS?
 * Is your docker daemon up and running?
 ```
-then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. If you get a table (which might be empty) like this:
+then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. Many times either getting a new terminal with the `Docker Quickstart Terminal` invocation or a `eval $(docker-machine env default)` invocation. Alternatively, a restart of the machine will do (last resource), and then again the quickstart. Eventually, it might be necessary to regenerate the VM's keys, but you would get a message for it. If you get a table (which might be empty) like this:
 ```
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
-then it is fine.
+or with containers in there, then it is fine.
 
 Now, lets lift the k8s cluster... execute
 ```
 docker-compose -f k8s.yaml up -d
 ```
-You should see:
+You should see, among some other lines:
 ```
 Starting localk8s_master_1...
 Starting localk8s_proxy_1...
@@ -46,7 +57,7 @@ On the google cloud platform, k8s is a "turn-key" technology, so if you run `gcl
 
 First we will take a brief look at the components of the docker compose (slides).
 
-## Communicating with the k8s cluster
+## Part 2: Communicating with the k8s cluster
 
 Once you have lifted your cluster, you need to be able to talk to it. k8s provides both a REST based access or a command-line interface (which is nothing but a client to this REST API). We are running a setup in which we have a virtual machine in the middle:
 
@@ -120,7 +131,7 @@ kubectl version
 
 #### What we are here for: sending jobs, pods, etc.
 
-In k8s, Jobs are one-off executions (ie. batch jobs), which is probably our most important use case (PhenoMeNal Project). More documentation on k8s jobs can be found [here](https://cloud.google.com/container-engine/docs/jobs). To send a job, you normally first condify it into a yaml or json file. The first example we will try looks like this:
+In k8s, Jobs are one-off executions (ie. batch jobs), which is probably our most important use case (PhenoMeNal Project). More documentation on k8s jobs can be found [here](https://cloud.google.com/container-engine/docs/jobs). To send a job, you normally first codify it into a yaml or json file. The first example we will try looks like this:
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -143,11 +154,11 @@ spec:
         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
       restartPolicy: Never
 ```
-If you have checked out this repo, it should be on the base directoy, under the name `example_jobs.yml`. What this job will do essentially is to run a docker image containing a `Perl` installation, and a command in will be executed in perl to compute the number \pi with 2000 decimals. Supposing you have the file mentioned in place, execute the following to send the job to the cluster:
+If you have checked out this repo, it should be on the base directoy, under the name `example_jobs.yml`. What this job will do essentially is to run a docker image containing a `Perl` installation, and a command will be executed in perl to compute the \pi number with 2,000 decimals. Supposing you have the file mentioned in place, execute the following to send the job to the cluster:
 ```
 kubectl create -f example_job.yaml
 ```
-And it should state that the job 'pi' was created. Kubernetes will automagically pull from Docker hub the docker image required, in this case, the perl [image](https://hub.docker.com/_/perl/). Normally an underscore before the image name means that that is the offical image provided for that something.
+And it should state that the job 'pi' was created. Kubernetes will automagically pull from Docker hub the docker image required, in this case, the perl [image](https://hub.docker.com/_/perl/). An underscore before the image name means that this is the offical image provided for that software.
 
 Now we can see what happened to our job (last two are the same if the file is there):
 ```
@@ -158,15 +169,44 @@ kubectl describe -f example_job.yaml
 When a job is sent, its actual execution is done through a pod. The last command shows us the pods that were created to execute this job (see table at the bottom, where it says "Message", it should say "Created pod: "). Using that pod name, or finding the name through `kubectl get pods`, you can then execute this to obtain more information about the run:
 
 ```
-kubectl describe pods/pi-...
+POD=`kubectl describe -f example_job.yaml | grep 'pod:' | awk -F'pod: ' '{ print $2 }'`
+kubectl describe pods/$POD
 ```
-The output might be indicative of an error in this case, but the important message is in the end in the 'Status' part.
+The output might be indicative of an error in this case, but the important message is in the first part, in the 'Status' field.
 
 Now, because this job is outputing to the STDOUT, we can easily see the output with:
 ```
-kubectl logs pi-...
+kubectl logs $POD
 ```
-Where `pi-...` is the name of the pod. You should see \pi with plenty of decimals. There was no need to install perl nor other dependencies to do this.
+You should see \pi with plenty of decimals. There was no need to install perl nor other dependencies to do this.
+
+
+
+### An example of a long-term running application (not a job)
+
+We will now very briefly deploy a Galaxy container on your own machine, and show how to expose it.
+
+```
+kubectl create -f galaxy_service.yaml
+kubectl create -f galaxy_rc.yaml
+kubectl describe svc/
+```
+
+On a separate tab/terminal, we are going to open a tunnel to reach that mentioned port on the k8s cluster.
+```
+GAL_PORT=`kubectl describe svc/galaxysvc | grep NodePort: | awk '{ print $3 }' | sed 's+/TCP++'`
+echo
+echo "Open browser on http://localhost:$GAL_PORT"
+echo
+docker-machine ssh default -L $GAL_PORT:localhost:$GAL_PORT
+```
+
+And if you want, you could get a shell on the machine (for whatever development purposes, REMEMBER to get back to the original terminal)
+```
+POD=`kubectl describe -f galaxy_rc.yaml | grep 'pod:' | awk -F'pod: ' '{ print $2 }'`
+kubectl exec -ti $POD -- bash
+```
+
 
 
 

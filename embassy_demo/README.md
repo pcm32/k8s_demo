@@ -39,10 +39,11 @@ and this is built (as in `docker build -t phnmnl/ex-blankfilter .`) by our EMBAS
 
 ### Job execution and shared file system  
 
+From here, I will execute everything from our W4M VM, on our EMBASSY Cloud. We need to get out of the Galaxy/W4M default Python development environment.
+
 ```bash
 deactivate
 ```
-to get out of the Galaxy/W4M default virtualenv.
 
 So, to execute that first step of the Uppsala example workflow, we would first need to somehow upload the data "somewhere", that would be our shared filesystem:
 
