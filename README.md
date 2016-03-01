@@ -70,7 +70,7 @@ Starting localk8s_proxy_1...
 Starting localk8s_etcd_1...
 ```
 which means that you have a k8s cluster running. This is a bit of an odd setup, as the master and node are running within the same machine as containers. If you are interested, there are many other ways of provisioning a k8s cluster [here](http://kubernetes.io/v1.1/docs/getting-started-guides/), both locally or on production infrastructure. There are also a number of independent tutorials on different flavours, such as [bloombergs](https://github.com/bloomberg/kubernetes-cluster-cookbook/blob/master/templates/default/flannel-flanneld.erb), [pangaea](https://github.com/hasura/pangaea), on [CoreOS](https://coreos.com/kubernetes/docs/latest/getting-started.html), or the one I'm [using](https://github.com/phnmnl/mantl-kubernetes) for openstack, among many others. 
-On the google cloud platform, k8s is a "turn-key" technology, so if you run `gcloud container clusters create <cluster_name>` you get a k8s cluster, that easy. There is also a way through the REST service and dashboard.
+On the google cloud platform, k8s is a "turn-key" technology, so if you run `gcloud container clusters create <cluster_name>` you get a k8s cluster, that easy. There is also a way through the REST service and dashboard. The kubernetes official github shows all available posibilities they have record of [here](https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/getting-started-guides/README.md#table-of-solutions).
 
 First we will take a brief look at the components of the docker compose (slides).
 
