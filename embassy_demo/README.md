@@ -104,6 +104,8 @@ less /mnt/glusterfs/uppsala-ex/output_blankfilter_workshop.xls
 
 ### Two is company, (but) three's a crowd
 
+![threeCompany](http://threescompany.wikia.com/wiki/File:Three%27s_Company.png)
+
 However, Galaxy is used to wait for the executable to finish to go and find result files. The `kubectl` API wrapper doesn't wait for jobs to finish, it only submits then. Hence, we wrote a [k8s-helper tool](https://github.com/phnmnl/k8s-helper) to interface `Galaxy` to `kubectl`. This tool sends a job to k8s through `kubectl`, interacts with `kubectl` until the job is done, to exit when this happens. By using `kubectl` as a dependency, we left to that tool the whole authentication process, finished job removal, failed job handling, etc. In the long term possible we should develop something that makes use of the REST API directly, but for proof of concept, this is fine.
 
 We will first illustrate the use of k8s-helper on its own, and later show how Galaxy makes use of it. To execute the very same job that we just run, this time through k8s-helper, we execute:
