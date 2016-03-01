@@ -159,4 +159,7 @@ ssh $NODE 'sudo ls -l /mnt/scratch/'
 
 This should show you that the file changed, and that a backup was produced.
 
-
+And we can delete the cluster:
+```
+gcloud container clusters delete k8s-test-1 --zone europe-west1-b
+```
