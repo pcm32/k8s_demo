@@ -106,7 +106,7 @@ less /mnt/glusterfs/uppsala-ex/output_blankfilter_workshop.xls
 
 ![threeCompany](http://www.sitcomsonline.com/photos/threescompanycast5.jpg)
 
-However, Galaxy is used to wait for the executable to finish to go and find result files. The `kubectl` API wrapper doesn't wait for jobs to finish, it only submits then. Hence, we wrote a [k8s-helper tool](https://github.com/phnmnl/k8s-helper) to interface `Galaxy` to `kubectl`. This tool sends a job to k8s through `kubectl`, interacts with `kubectl` until the job is done, to exit when this happens. By using `kubectl` as a dependency, we left to that tool the whole authentication process, finished job removal, failed job handling, etc. In the long term possible we should develop something that makes use of the REST API directly, but for proof of concept, this is fine.
+Galaxy is used to wait for the executable to finish to go and find result files. The `kubectl` API wrapper doesn't wait for jobs to finish, it only submits them. Hence, we wrote a [k8s-helper tool](https://github.com/phnmnl/k8s-helper) to act in between `Galaxy` and `kubectl`. This tool sends a job to k8s through `kubectl`, interacts with `kubectl` until the job is done, and only exits then. By using `kubectl` as a dependency, we left to that tool the whole authentication process. Our helper removes finished jobs, handles failed jobs, produces unique job identifiers, etc. In the long term, we should probably develop something that makes use of the k8s REST API directly, but for proof of concept, the current solution works.
 
 We will first illustrate the use of k8s-helper on its own, and later show how Galaxy makes use of it. To execute the very same job that we just run, this time through k8s-helper, we execute:
 
@@ -192,6 +192,8 @@ So, for `k8s` based execution, we would need a wrapper that instead looks more o
 ```
 
 Lets go and see this working now on Galaxy/W4M.
+
+[http://phenomenal-h2020.eu/galaxy/](http://phenomenal-h2020.eu/galaxy/)
 
 
 
