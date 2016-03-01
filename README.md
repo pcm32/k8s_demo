@@ -189,7 +189,7 @@ We will now very briefly deploy a Galaxy container on your own machine, and show
 ```
 kubectl create -f galaxy_service.yaml
 kubectl create -f galaxy_rc.yaml
-kubectl describe svc/
+kubectl describe svc/galaxysvc
 ```
 
 On a separate tab/terminal, we are going to open a tunnel to reach that mentioned port on the k8s cluster.

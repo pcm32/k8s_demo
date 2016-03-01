@@ -94,7 +94,7 @@ spec:
 
 Please note that for this to work, the docker image needs to be at an accesible docker registry (in this case [here](https://hub.docker.com/r/phenomenal/ipo/)).
 
-Take a look at the description that k8s has for the job and pod submitted (remember how?), what can you see? Does it mention anything about the mount point?How can we get the STDOUT of the job we just run?
+Take a look at the description that k8s has for the job and pod submitted (remember how to do it?), what can you see? Does it mention anything about the mount point?How can we get the STDOUT of the job we just run?
 
 
 
@@ -120,19 +120,7 @@ On the description you should see the volumes mounted and in the events you shou
 
 
 
-We can now try for instance one of our images...
 
-```
-kubectl create -f test_ipo.yaml
-```
-
-Look at this yaml file to see how the glusterfs is mounted...
-
-```
-kubectl get jobs
-kubectl describe -f test_ipo.yaml
-kubectl describe pods/<pod-id>
-```
 
 Only to show that glusterfs deployed works, you can upload a file to the glusterfs share (located on /mnt/scratch on the nodes)
 ```
@@ -141,6 +129,26 @@ scp about_kubernetes.txt $NODE:~/
 ssh $NODE 'sudo cp about_kubernetes.txt /mnt/scratch/'
 kubectl create -f replace_glusterfs_example.yaml
 ```
+
+The defined replacement job spec that looks like this:
+```yaml
+    spec:
+      containers:
+      - name: perl-replace
+        image: perl
+        command: ["perl", "-i.bak", "-p", "-e", "s/[Kk]ubernetes/k8s/g","/mnt/glusterfs/about_kubernetes.txt"]
+        volumeMounts: 
+          - name: glusterfsvol
+            mountPath: /mnt/glusterfs
+      volumes: 
+         - name: glusterfsvol
+           glusterfs: 
+               endpoints: glusterfs-cluster
+               path: scratch
+               readOnly: false
+      restartPolicy: Never
+```
+
 Take a look at the local `about_kubernetes.txt`, so that you can notice the difference after the job is done. This will essentially replace all the \[Kk\]ubernetes to its abbreviated form 'k8s'.
 
 And once the job is completed:
@@ -150,3 +158,5 @@ ssh $NODE 'sudo ls -l /mnt/scratch/'
 ```
 
 This should show you that the file changed, and that a backup was produced.
+
+
