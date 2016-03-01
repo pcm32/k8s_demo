@@ -2,30 +2,47 @@
 
 ## Requirements
 
-Please make sure that you have docker installed, and docker-machine installed if using a mac or windows. Docker-machine can also be installed on linux, and for the sake of this hands-on, we will assume that you have it installed.
+Please make sure that you have docker, docker-compose and docker-machine installed if using a mac or windows. Docker-machine can also be installed on linux, and for the sake of this hands-on, we will assume that you have it installed.
 
-You can get docker-toolbox (includes docker-machine) for Mac and Windows [here](https://www.docker.com/products/docker-toolbox).
+Installation options for docker-machine:
 
-On the Mac it can be installed with `brew install docker-machine` (if you use homebrew)
+* docker-toolbox (includes docker-machine) from docker: for Mac and Windows [https://www.docker.com/products/docker-toolbox](https://www.docker.com/products/docker-toolbox).
+* docker-machine only from docker: for Mac or Linux [https://docs.docker.com/machine/install-machine/](https://docs.docker.com/machine/install-machine/)
+* brew: for Mac or Linux with (home)brew installed, execute `brew install docker-machine`
 
-On Ubuntu (such as the VM that Marco facilitated yesterday) you could use the directions shown [here](https://docs.docker.com/machine/install-machine/) (simply a binary download).
+For docker-compose (if not installed already, check first):
+
+* From docker site [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
+
+Previous executions of some tools (such as VirtualBox) might have messed some aspects of your machine's networking, please restart.
+
+Create a new vm using docker-machine:
+```
+docker-machine create --driver virtualbox k8s-vm
+```
+
 
 ## Part 1: Lifting up your own instance
 
 We are going to lift a k8s cluster locally for the sake of interacting with it in simple scenarios. This is clearly not a production set up, but an instance to learn the basics on the interactions with a Kubernetes cluster. We are going to use a docker compose approach.
 
-If you are in a mac or windows, make sure that you are in a terminal that has proper docker access. With docker-machine installed, this can be done by opening `Docker Quickstart Terminal` application. This should start you `docker-machine` VM if it is not already running. If you have worked before with docker machine and have many docker containers running, or have run this tutorial before, I would recommend that you get a semi-fresh start by restarting the VM.
+If you have worked before with docker machine and have many docker containers running, or have run this tutorial before, I would recommend that you get a semi-fresh start by restarting the VM.
 
-On the blessed terminal:
 ```
-docker-machine restart default
+docker-machine restart k8s-vm
 ```
 
-On the same terminal, clone or download this repo at an appropiate location for you:
+Clone or download this repo at an appropiate location for you:
 ```
 git clone https://github.com/pcm32/k8s_demo.git
 cd k8s_demo
 ```
+
+Configure the terminal you are using to hook to the docker-vm that we just created:
+```
+eval $(docker-machine env k8s-vm)
+```
+
 Now, check that docker is running and accessible (in the docker-machine terminal, sudo is not necessary):
 ```
 docker ps
@@ -36,7 +53,7 @@ Get http:///var/run/docker.sock/v1.20/containers/json: dial unix /var/run/docker
 * Are you trying to connect to a TLS-enabled daemon without TLS?
 * Is your docker daemon up and running?
 ```
-then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. Many times either getting a new terminal with the `Docker Quickstart Terminal` invocation or a `eval $(docker-machine env default)` invocation. Alternatively, a restart of the machine will do (last resource), and then again the quickstart. Eventually, it might be necessary to regenerate the VM's keys, but you would get a message for it. If you get a table (which might be empty) like this:
+then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. Many times either getting a new terminal with the `Docker Quickstart Terminal` invocation or a `eval $(docker-machine env k8s-vm)` invocation. Alternatively, a restart of the machine will do (last resource), and then again the quickstart. Eventually, it might be necessary to regenerate the VM's keys, but you would get a message for it. If you get a table (which might be empty) like this:
 ```
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
@@ -65,7 +82,8 @@ Once you have lifted your cluster, you need to be able to talk to it. k8s provid
 
 This means that we need to first tunnel our way through the VM to access the cluster. We achieve this on a separate terminal with:
 ```
-docker-machine ssh default -L 8080:localhost:8080
+eval $(docker-machine env k8s-vm)
+docker-machine ssh k8s-vm -L 8080:localhost:8080
 ```
 if you are running on linux directly, you probably don't need to do this. 
 
@@ -194,11 +212,12 @@ kubectl describe svc/galaxysvc
 
 On a separate tab/terminal, we are going to open a tunnel to reach that mentioned port on the k8s cluster.
 ```
+eval $(docker-machine env k8s-vm)
 GAL_PORT=`kubectl describe svc/galaxysvc | grep NodePort: | awk '{ print $3 }' | sed 's+/TCP++'`
 echo
 echo "Open browser on http://localhost:$GAL_PORT"
 echo
-docker-machine ssh default -L $GAL_PORT:localhost:$GAL_PORT
+docker-machine ssh k8s-vm -L $GAL_PORT:localhost:$GAL_PORT
 ```
 
 And if you want, you could get a shell on the machine (for whatever development purposes, REMEMBER to get back to the original terminal)

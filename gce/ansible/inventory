@@ -1,9 +1,0 @@
-[master]
-gke-k8s-test-2-1e52c4fa-node-ntbw
-gke-k8s-test-2-1e52c4fa-node-uugf
-gke-k8s-test-2-1e52c4fa-node-vx1y
-
-[node]
-gke-k8s-test-2-1e52c4fa-node-ntbw
-gke-k8s-test-2-1e52c4fa-node-uugf
-gke-k8s-test-2-1e52c4fa-node-vx1y
