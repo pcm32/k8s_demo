@@ -53,7 +53,9 @@ Get http:///var/run/docker.sock/v1.20/containers/json: dial unix /var/run/docker
 * Are you trying to connect to a TLS-enabled daemon without TLS?
 * Is your docker daemon up and running?
 ```
-then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. Many times either getting a new terminal with the `Docker Quickstart Terminal` invocation or a `eval $(docker-machine env k8s-vm)` invocation. Alternatively, a restart of the machine will do (last resource), and then again the quickstart. Eventually, it might be necessary to regenerate the VM's keys, but you would get a message for it. If you get a table (which might be empty) like this:
+then it probably means that your are not in the correct terminal or there is something wrong with your docker/docker-machine installation. If the `eval $(docker-machine env k8s-vm)` invocation doesn't fix it, please try restarting the machine `docker-machine restart k8s-vm`. Eventually, it might be necessary to regenerate the VM's keys, but you would get a message for it. 
+
+If, on the contrary, you get a table (which might be empty) like this:
 ```
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
@@ -80,12 +82,12 @@ Once you have lifted your cluster, you need to be able to talk to it. k8s provid
 
 ![docker on mac](https://docs.docker.com/engine/installation/images/mac_docker_host.svg) 
 
-This means that we need to first tunnel our way through the VM to access the cluster. We achieve this on a separate terminal with:
+This means that we need to first tunnel our way through the VM to access the cluster. 
+
 ```
-eval $(docker-machine env k8s-vm)
-docker-machine ssh k8s-vm -L 8080:localhost:8080
+mkdir -p ~/.ssh/controlmasters
+docker-machine ssh k8s-vm -L 8080:localhost:8080 -M -S ~/.ssh/controlmasters/test -f -N -T
 ```
-if you are running on linux directly, you probably don't need to do this. 
 
 At this point you should be able to access the cluster through it's REST API:
 ```
@@ -212,18 +214,21 @@ kubectl describe svc/galaxysvc
 
 On a separate tab/terminal, we are going to open a tunnel to reach that mentioned port on the k8s cluster.
 ```
-eval $(docker-machine env k8s-vm)
 GAL_PORT=`kubectl describe svc/galaxysvc | grep NodePort: | awk '{ print $3 }' | sed 's+/TCP++'`
-echo
+docker-machine ssh k8s-vm -L $GAL_PORT:localhost:$GAL_PORT -M -S ~/.ssh/controlmasters/test -f -N -T
+
 echo "Open browser on http://localhost:$GAL_PORT"
-echo
-docker-machine ssh k8s-vm -L $GAL_PORT:localhost:$GAL_PORT
 ```
 
 And if you want, you could get a shell on the machine (for whatever development purposes, REMEMBER to get back to the original terminal)
 ```
 POD=`kubectl describe -f galaxy_rc.yaml | grep 'pod:' | awk -F'pod: ' '{ print $2 }'`
 kubectl exec -ti $POD -- bash
+```
+
+You can close the ssh tunnels:
+```
+docker-machine k8s-vm ssh -T -O "exit"
 ```
 
 
