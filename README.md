@@ -231,6 +231,9 @@ You can close the ssh tunnels:
 docker-machine k8s-vm ssh -T -O "exit"
 ```
 
+## An alternative for Mac OS X
+
+Another way of running Kubernetes on Mac OS X, using a multi-node setup, is the excellent [Kubernetes Cluster for OS X](https://github.com/TheNewNormal/kube-cluster-osx). It will allow you to deploy a k8s cluster on your mac based on VMs running [CoreOS](www.coreos.com).
 
 
 
