@@ -163,3 +163,7 @@ And we can delete the cluster:
 ```
 gcloud container clusters delete k8s-test-1 --zone europe-west1-b
 ```
+
+## Alternative to GCE default k8s installation
+
+Another option to run Kubernetes on GCE (based on CoreOS VMs) is provided on [kube-gce](https://github.com/rimusz/kube-gce). It relies on gcloud API calls and shell scripts, relatively fast deployment.
