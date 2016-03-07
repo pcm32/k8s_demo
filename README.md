@@ -228,7 +228,7 @@ kubectl exec -ti $POD -- bash
 
 You can close the ssh tunnels:
 ```
-docker-machine k8s-vm ssh -T -O "exit"
+docker-machine ssh k8s-vm -T -O "exit"
 ```
 
 ## An alternative for Mac OS X
